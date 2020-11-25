@@ -1,0 +1,49 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Train.py",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/train.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--num_iter",
+                "10000",
+                "--exp_name",
+                "XXXX",
+                "--train_data",
+                "${workspaceFolder}/../data/data_lmdb/train",
+                "--valid_data",
+                "${workspaceFolder}/../data/data_lmdb/valid",
+                "--select_data",
+                "basic-skew",
+                "--batch_ratio",
+                "0.5-0.5",
+                "--Transformation",
+                "None",
+                "--FeatureExtraction",
+                "ResNet",
+                "--SequenceModeling",
+                "BiLSTM",
+                "--Prediction",
+                "CTC",
+                "--data_filtering_off",
+                "--batch_max_length",
+                "50",
+                "--workers",
+                "4",
+                "--character",
+                "핵무기보유와123456자회담철수를선언한미기류北核",
+                "--hidden_size" , "512",
+                "--imgH" , "32",
+                "--imgW" ,"200"
+
+                // "--gpu_devices", "0"
+            ],
+        }
+    ]
+}
