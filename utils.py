@@ -1,7 +1,12 @@
 import torch
+import os
+import glob
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-
+def deleteFilter(pattern):
+    flist = glob.glob(pattern)
+    for f in flist:
+        os.remove(f)
 class CTCLabelConverter(object):
     """ Convert between text-label and text-index """
 

@@ -222,6 +222,7 @@ class RawDataset(Dataset):
         self.opt = opt
         self.image_path_list = []
         for dirpath, dirnames, filenames in os.walk(root):
+            print(dirpath,dirnames,filenames)
             for name in filenames:
                 _, ext = os.path.splitext(name)
                 ext = ext.lower()
@@ -311,7 +312,7 @@ class AlignCollate(object):
                     resized_w = self.imgW
                 else:
                     resized_w = math.ceil(self.imgH * ratio)
-
+                # print(" xxx " ,w,h, self.imgH,self.imgW)
                 resized_image = image.resize((resized_w, self.imgH), Image.BICUBIC)
                 resized_images.append(transform(resized_image))
                 # resized_image.save('./image_test/%d_test.jpg' % w)
@@ -320,6 +321,7 @@ class AlignCollate(object):
 
         else:
             transform = ResizeNormalize((self.imgW, self.imgH))
+            # print(" xxx2 "  , self.imgH,self.imgW)
             image_tensors = [transform(image) for image in images]
             image_tensors = torch.cat([t.unsqueeze(0) for t in image_tensors], 0)
 
@@ -337,3 +339,5 @@ def tensor2im(image_tensor, imtype=np.uint8):
 def save_image(image_numpy, image_path):
     image_pil = Image.fromarray(image_numpy)
     image_pil.save(image_path)
+def save_tensor(image_tensor,image_path,imtype=np.uint8):
+    save_image(tensor2im(image_tensor,imtype),image_path)

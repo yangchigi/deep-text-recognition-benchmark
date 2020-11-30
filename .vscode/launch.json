@@ -5,20 +5,49 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Python: pred.py",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/pred.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--image_folder",
+                "${workspaceFolder}/../test_image",
+                "--saved_model",
+                "${workspaceFolder}/saved_models/20201125_14_42/best_accuracy.pth",
+                "--Transformation",
+                "None",
+                "--FeatureExtraction",
+                "ResNet",
+                "--SequenceModeling",
+                "BiLSTM",
+                "--Prediction",
+                "CTC",
+                "--character",
+                "핵무기보유와123456자회담철수를선언한미기류北核",
+                "--hidden_size" , "512",
+                "--imgH" , "32",
+                "--imgW" ,"400"
+
+                // "--gpu_devices", "0"
+            ],
+        },
+        {
             "name": "Python: Train.py",
             "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}/train.py",
             "console": "integratedTerminal",
             "args": [
+                "--PAD",
                 "--num_iter",
                 "10000",
                 "--exp_name",
-                "XXXX",
+                "DEBUG",
                 "--train_data",
-                "${workspaceFolder}/../data/data_lmdb/train",
+                "${workspaceFolder}/../data64_300/data_lmdb/train",
                 "--valid_data",
-                "${workspaceFolder}/../data/data_lmdb/valid",
+                "${workspaceFolder}/../data64_300/data_lmdb/valid",
                 "--select_data",
                 "basic-skew",
                 "--batch_ratio",
@@ -33,14 +62,16 @@
                 "CTC",
                 "--data_filtering_off",
                 "--batch_max_length",
-                "50",
+                "28",
+                "--batch_size",
+                "10" ,
                 "--workers",
-                "4",
+                "1",
                 "--character",
                 "핵무기보유와123456자회담철수를선언한미기류北核",
                 "--hidden_size" , "512",
                 "--imgH" , "32",
-                "--imgW" ,"200"
+                "--imgW" ,"400"
 
                 // "--gpu_devices", "0"
             ],

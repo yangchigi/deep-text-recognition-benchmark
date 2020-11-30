@@ -7,10 +7,10 @@ import torch.utils.data
 import torch.nn.functional as F
 
 from utils import CTCLabelConverter, AttnLabelConverter
-from dataset import RawDataset, AlignCollate
+from dataset import RawDataset, AlignCollate ,save_tensor
 from model import Model
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
+import numpy as np
 
 def demo(opt):
     """ model configuration """
@@ -56,6 +56,17 @@ def demo(opt):
 
                 # Select max probabilty (greedy decoding) then decode index to character
                 preds_size = torch.IntTensor([preds.size(1)] * batch_size)
+                
+                
+                ######## filter ignore_char, rebalance
+                preds_prob = F.softmax(preds, dim=2)
+                preds_prob = preds_prob.cpu().detach().numpy()
+                # preds_prob[:,:,ignore_idx] = 0.
+                pred_norm = preds_prob.sum(axis=2)
+                preds_prob = preds_prob/np.expand_dims(pred_norm, axis=-1)
+                preds_prob = torch.from_numpy(preds_prob).float().to(device)
+                
+                
                 _, preds_index = preds.max(2)
                 # preds_index = preds_index.view(-1)
                 preds_str = converter.decode(preds_index, preds_size)
@@ -76,6 +87,9 @@ def demo(opt):
             log.write(f'{dashed_line}\n{head}\n{dashed_line}\n')
 
             preds_prob = F.softmax(preds, dim=2)
+            
+
+
             preds_max_prob, _ = preds_prob.max(dim=2)
             for img_name, pred, pred_max_prob in zip(image_path_list, preds_str, preds_max_prob):
                 if 'Attn' in opt.Prediction:
@@ -109,7 +123,7 @@ if __name__ == '__main__':
     parser.add_argument('--Transformation', type=str, required=True, help='Transformation stage. None|TPS')
     parser.add_argument('--FeatureExtraction', type=str, required=True, help='FeatureExtraction stage. VGG|RCNN|ResNet')
     parser.add_argument('--SequenceModeling', type=str, required=True, help='SequenceModeling stage. None|BiLSTM')
-    parser.add_argument('--Prediction', type=str, required=True, help='Prediction stage. CTC|Attn')
+    parser.add_argument('--Prediction', type=str, default="CTC" ,required=True, help='Prediction stage. CTC|Attn')
     parser.add_argument('--num_fiducial', type=int, default=20, help='number of fiducial points of TPS-STN')
     parser.add_argument('--input_channel', type=int, default=1, help='the number of input channel of Feature extractor')
     parser.add_argument('--output_channel', type=int, default=512,

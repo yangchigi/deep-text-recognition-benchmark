@@ -12,11 +12,12 @@ import torch.optim as optim
 import torch.utils.data
 import numpy as np
 
-from utils import CTCLabelConverter, CTCLabelConverterForBaiduWarpctc, AttnLabelConverter, Averager
-from dataset import hierarchical_dataset, AlignCollate, Batch_Balanced_Dataset
+from utils import CTCLabelConverter, CTCLabelConverterForBaiduWarpctc, AttnLabelConverter, Averager ,deleteFilter
+from dataset import hierarchical_dataset, AlignCollate, Batch_Balanced_Dataset ,save_tensor
 from model import Model
 from test import validation
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+device = None 
 
 
 def train(opt):
@@ -25,7 +26,10 @@ def train(opt):
         print('Filtering the images containing characters which are not in opt.character')
         print('Filtering the images whose label is longer than opt.batch_max_length')
         # see https://github.com/clovaai/deep-text-recognition-benchmark/blob/6593928855fb7abb999a99f428b3e4477d4ae356/dataset.py#L130
-
+    if opt.cpu:
+        device = torch.device('cpu')
+    else:
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     opt.select_data = opt.select_data.split('-')
     opt.batch_ratio = opt.batch_ratio.split('-')
     train_dataset = Batch_Balanced_Dataset(opt)
@@ -192,9 +196,13 @@ def train(opt):
                 if current_accuracy > best_accuracy:
                     best_accuracy = current_accuracy
                     torch.save(model.state_dict(), f'./saved_models/{opt.exp_name}/best_accuracy.pth')
+                    deleteFilter(f'./saved_models/{opt.exp_name}/best_accuracy_*.pth')
+                    torch.save(model.state_dict(), f'./saved_models/{opt.exp_name}/best_accuracy_{current_accuracy:0.3}.pth')
                 if current_norm_ED > best_norm_ED:
                     best_norm_ED = current_norm_ED
                     torch.save(model.state_dict(), f'./saved_models/{opt.exp_name}/best_norm_ED.pth')
+                    deleteFilter(f'./saved_models/{opt.exp_name}/best_norm_ED_*.pth')
+                    torch.save(model.state_dict(), f'./saved_models/{opt.exp_name}/best_norm_ED_{current_norm_ED:0.3}.pth')
                 best_model_log = f'{"Best_accuracy":17s}: {best_accuracy:0.3f}, {"Best_norm_ED":17s}: {best_norm_ED:0.2f}'
 
                 loss_model_log = f'{loss_log}\n{current_model_log}\n{best_model_log}'
@@ -229,6 +237,7 @@ def train(opt):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--exp_name', help='Where to store logs and models')
+    parser.add_argument('--cpu', action='store_true', help='cpu ')
     parser.add_argument('--train_data', required=True, help='path to training dataset')
     parser.add_argument('--valid_data', required=True, help='path to validation dataset')
     parser.add_argument('--manualSeed', type=int, default=1111, help='for random seed setting')
